@@ -10,6 +10,6 @@ using operator and install all-in-one Elasticsearch with Kibana on a 4 node kube
 Elastic cloud deploy on the master node and
 metricbeat and fluentd deploy on each node to collect metric and logging.
 
-![logstash](/image/kibana-logstash.png)
-![metricbeat](/image/kibana-metricbeat.png)
-![Kubernetes Dashboard](/image/kubernetes-dashboard.png)
+![logstash](/image/kibana-logstash.PNG)
+![metricbeat](/image/kibana-metricbeat.PNG)
+![Kubernetes Dashboard](/image/kubernetes-dashboard.PNG)
