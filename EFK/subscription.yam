@@ -1,0 +1,22 @@
+# https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/subscription-config.md
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: elastic-cloud-eck
+  namespace: openshift-operators
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: elastic-cloud-eck
+  source: elastic-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: elastic-cloud-eck.v1.3.0
+  config:
+    volumes:
+      - name: config
+        configMap:
+          name: elastic-operator
+    volumeMounts:
+      - name: config
+        mountPath: /conf
+        readOnly: true

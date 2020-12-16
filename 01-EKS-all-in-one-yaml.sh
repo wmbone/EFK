@@ -1,0 +1,1 @@
+curl -OL https://download.elastic.co/downloads/eck/1.3.0/all-in-one.yaml

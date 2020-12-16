@@ -1,0 +1,1 @@
+kubectl apply all-in-one.yaml

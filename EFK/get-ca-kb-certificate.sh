@@ -1,0 +1,1 @@
+kubectl get secret "quickstart-kb-http-certs-public" -o go-template='{{index .data "tls.crt" | base64decode }}' > tls-kb.crt

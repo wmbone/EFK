@@ -1,0 +1,148 @@
+# https://github.com/elastic/cloud-on-k8s/issues/2853
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  annotations:
+    common.k8s.elastic.co/controller-version: 1.0.1
+    elasticsearch.k8s.elastic.co/cluster-uuid: xVkiLb4RRnmBhqXCXt4d-A
+  creationTimestamp: "2020-04-08T21:40:39Z"
+  generation: 17
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/version: 7.6.1
+    common.k8s.elastic.co/type: elasticsearch
+    elasticsearch.k8s.elastic.co/cluster-name: elasticsearch
+    elasticsearch.k8s.elastic.co/statefulset-name: elasticsearch-es-data
+    helm.sh/chart: elasticsearch-1.0.1
+  name: elasticsearch
+  namespace: elastic-system
+  resourceVersion: "16413186"
+  selfLink: /apis/elasticsearch.k8s.elastic.co/v1/namespaces/elastic-system/elasticsearches/elasticsearch
+  uid: 7b8deb0a-eb3a-4db0-b2a2-5115dfdd52e5
+spec:
+  http:
+    service:
+      metadata:
+        creationTimestamp: null
+      spec: {}
+    tls:
+      certificate: {}
+      selfSignedCertificate:
+        disabled: true
+  nodeSets:
+  - config:
+      cluster.remote.connect: false
+      index.store.type: mmapfs
+      node.data: false
+      node.ingest: false
+      node.master: true
+      xpack.monitoring.collection.enabled: true
+      xpack.monitoring.exporters:
+        my_local:
+          index.name.time_format: YYYY-MM
+          type: local
+      xpack.security.authc.realms:
+        native:
+          native1:
+            order: 1
+    count: 3
+    name: masters
+    podTemplate:
+      metadata:
+        annotations:
+          ad.datadoghq.com/elasticsearch.check_names: '["elastic"]'
+          ad.datadoghq.com/elasticsearch.init_configs: '[{}]'
+      spec:
+        containers:
+        - name: elasticsearch
+          resources:
+            limits:
+              cpu: 500m
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 2Gi
+        initContainers:
+        - command:
+          - sh
+          - -c
+          - |
+            bin/elasticsearch-plugin install --batch repository-s3
+            echo "y" | bin/elasticsearch-keystore create
+          name: install-plugins
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-masters
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - config:
+      cluster.remote.connect: false
+      index.store.type: mmapfs
+      indices.recovery.max_bytes_per_sec: 500mb
+      node.data: true
+      node.ingest: true
+      node.master: false
+      xpack.monitoring.collection.enabled: true
+      xpack.monitoring.exporters:
+        my_local:
+          index.name.time_format: YYYY-MM
+          type: local
+      xpack.security.authc.realms:
+        native:
+          native1:
+            order: 1
+    count: 2
+    name: data
+    podTemplate:
+      metadata:
+        annotations:
+          ad.datadoghq.com/elasticsearch.check_names: '["elastic"]'
+          ad.datadoghq.com/elasticsearch.init_configs: '[{}]'
+      spec:
+        containers:
+        - env:
+          - name: ES_JAVA_OPTS
+            value: -Xms1g -Xmx1g
+          name: elasticsearch
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: "2"
+              memory: 2Gi
+        initContainers:
+        - command:
+          - sh
+          - -c
+          - |
+            bin/elasticsearch-plugin install --batch repository-s3
+            echo "y" | bin/elasticsearch-keystore create
+          name: install-plugins
+        - command:
+          - sh
+          - -c
+          - sysctl -w vm.max_map_count=262144
+          name: set-max-map-count
+          securityContext:
+            privileged: true
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 400Gi
+  updateStrategy:
+    changeBudget: {}
+  version: 7.6.1
+status:
+  availableNodes: 5
+  health: green
+  phase: Ready
